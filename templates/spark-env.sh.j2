@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# {{ ansible_managed }}
+# This file is sourced when running various Spark programs.
+
+{% for var in spark_env_sh %}
+{{var}}
+{% endfor %}

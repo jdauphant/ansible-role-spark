@@ -1,0 +1,47 @@
+---
+- name: install spark dependancy for Debian OS family
+  apt: pkg=git
+  environment: spark_environment
+  when: ansible_os_family == 'Debian'
+  tags: ["packages","spark"]
+
+- name: ensure spark user exist
+  user: name={{spark_user}}
+  tags: ["packages","spark"]
+
+- name: ensure spark install dir exist and belong to spark user
+  file: state=directory path={{spark_install_dir}} owner={{spark_user}} recurse=yes
+  tags: ["packages","spark"]
+
+- name: retreive spark from git
+  sudo_user: "{{spark_user}}"
+  tags: packerio
+  git: > 
+     repo={{spark_repository}} dest={{spark_install_dir}} 
+     version={{spark_version}} update=yes depth=1 
+  environment: spark_environment
+  tags: ["packages","spark"]
+
+- name: spark compilation
+  sudo_user: "{{spark_user}}"
+  command: "sbt/sbt assembly {{spark_compile_options}}"
+  args:
+    chdir: "{{spark_install_dir}}"
+  environment: spark_environment
+  tags: ["packages","spark"]
+
+- name: configure spark
+  template: src={{item}}.j2 dest={{spark_install_dir}}/conf/{{item}} owner={{spark_user}}
+  with_items:
+     - spark-defaults.conf
+     - spark-env.sh
+  tags: ["configuration","spark"]
+
+- name: add symlink for default spark version
+  file: state=link src={{spark_install_dir}} dest={{spark_link_dir}}
+  tags: ["configuration","spark"]
+
+- name: configure spark env for user
+  template: src=spark.sh.j2 dest=/etc/profile.d/spark.sh
+  tags: ["configuration","spark"]
+
