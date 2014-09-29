@@ -24,7 +24,7 @@
 
 - name: spark compilation
   sudo_user: "{{spark_user}}"
-  command: "sbt/sbt assembly {{spark_compile_options}}"
+  shell: "sbt/sbt assembly {{spark_compile_options}}"
   args:
     chdir: "{{spark_install_dir}}"
   environment: spark_environment
