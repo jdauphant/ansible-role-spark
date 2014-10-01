@@ -6,3 +6,4 @@ spark_link_dir: "/opt/spark"
 spark_compile_options: "-Phive -Pyarn"
 spark_environment: {}
 spark_user: "spark"
+spark_group: "{{spark_user}}"

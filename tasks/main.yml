@@ -5,12 +5,16 @@
   when: ansible_os_family == 'Debian'
   tags: ["packages","spark"]
 
+- name: ensure spark group exist
+  group: name={{spark_group}}
+  tags: ["packages","spark"]
+
 - name: ensure spark user exist
-  user: name={{spark_user}}
+  user: name={{spark_user}} group={{spark_group}}
   tags: ["packages","spark"]
 
 - name: ensure spark install dir exist and belong to spark user
-  file: state=directory path={{spark_install_dir}} owner={{spark_user}} recurse=yes
+  file: state=directory path={{spark_install_dir}} owner={{spark_user}} group={{spark_group}} recurse=yes
   tags: ["packages","spark"]
 
 - name: retreive spark from git
@@ -24,11 +28,14 @@
 
 - name: spark compilation
   sudo_user: "{{spark_user}}"
-  shell: "sbt/sbt assembly {{spark_compile_options}}"
+  shell: "{{item}}"
   args:
     chdir: "{{spark_install_dir}}"
   environment: spark_environment
-  tags: ["packages","spark"]
+  with_items:
+     - mvn dependency:resolve
+     - sbt/sbt assembly {{spark_compile_options}}
+  tags: ["compilation","spark"]
 
 - name: configure spark
   template: src={{item}}.j2 dest={{spark_install_dir}}/conf/{{item}} owner={{spark_user}}
