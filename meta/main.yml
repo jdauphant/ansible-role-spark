@@ -100,4 +100,4 @@ galaxy_info:
   #- packaging
   #- system
   #- web
-dependencies: ['maven']
+dependencies: []
